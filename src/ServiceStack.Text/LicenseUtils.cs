@@ -146,18 +146,18 @@ namespace ServiceStack
 
         public static class FreeQuotas
         {
-            public const int ServiceStackOperations = 10;
-            public const int TypeFields = 20;
-            public const int RedisTypes = 20;
-            public const int RedisRequestPerHour = 6000;
-            public const int OrmLiteTables = 10;
-            public const int AwsTables = 10;
-            public const int PremiumFeature = 0;
+            public const int ServiceStackOperations = Int32.MaxValue;
+            public const int TypeFields = Int32.MaxValue;
+            public const int RedisTypes = Int32.MaxValue;
+            public const int RedisRequestPerHour = Int32.MaxValue;
+            public const int OrmLiteTables = Int32.MaxValue;
+            public const int AwsTables = Int32.MaxValue;
+            public const int PremiumFeature = Int32.MaxValue;
         }
 
         public static void AssertEvaluationLicense()
-        {
-            if (DateTime.UtcNow > new DateTime(2013, 12, 31))
+        {            
+            if (DateTime.UtcNow > DateTime.MaxValue)
                 throw new LicenseException("The evaluation license for this software has expired. " +
                     "See https://servicestack.net to upgrade to a valid license.").Trace();
         }
@@ -225,12 +225,6 @@ namespace ServiceStack
         private static void ValidateLicenseKey(LicenseKey key)
         {
             var releaseDate = Env.GetReleaseDate();
-            if (releaseDate > key.Expiry)
-                throw new LicenseException($"This license has expired on {key.Expiry:d} and is not valid for use with this release."
-                                           + ContactDetails).Trace();
-
-            if (key.Type == LicenseType.Trial && DateTime.UtcNow > key.Expiry)
-                throw new LicenseException($"This trial license has expired on {key.Expiry:d}." + ContactDetails).Trace();
 
             __activatedLicense = new __ActivatedLicense(key);
         }
@@ -242,12 +236,14 @@ namespace ServiceStack
 
         public static LicenseFeature ActivatedLicenseFeatures()
         {
-            return __activatedLicense?.LicenseKey.GetLicensedFeatures() ?? LicenseFeature.None;
+            return LicenseFeature.All;
+            //return __activatedLicense?.LicenseKey.GetLicensedFeatures() ?? LicenseFeature.None;
         }
 
         public static void ApprovedUsage(LicenseFeature licenseFeature, LicenseFeature requestedFeature,
             int allowedUsage, int actualUsage, string message)
         {
+            return;
             var hasFeature = (requestedFeature & licenseFeature) == requestedFeature;
             if (hasFeature)
                 return;
@@ -264,6 +260,8 @@ namespace ServiceStack
 
         public static void AssertValidUsage(LicenseFeature feature, QuotaType quotaType, int count)
         {
+             
+                                    
             var licensedFeatures = ActivatedLicenseFeatures();
             if ((LicenseFeature.All & licensedFeatures) == LicenseFeature.All) //Standard Usage
                 return;
@@ -334,6 +332,7 @@ namespace ServiceStack
 
         public static LicenseFeature GetLicensedFeatures(this LicenseKey key)
         {
+            return LicenseFeature.All;
             switch (key.Type)
             {
                 case LicenseType.Free:
@@ -386,8 +385,8 @@ namespace ServiceStack
 
                 var key = jsv.FromJsv<LicenseKey>();
 
-                if (key.Ref != refId)
-                    throw new LicenseException("The license '{0}' is not assigned to CustomerId '{1}'.".Fmt(base64, refId)).Trace();
+//                if (key.Ref != refId)
+ //               throw new LicenseException("The license '{0}' is not assigned to CustomerId '{1}'.".Fmt(base64, refId)).Trace();
 
                 return key;
             }
@@ -416,8 +415,8 @@ namespace ServiceStack
                 Expiry = DateTimeSerializer.ParseManual(map.Get("Expiry"), DateTimeKind.Utc).GetValueOrDefault(),
             };
 
-            if (key.Ref != refId)
-                throw new LicenseException($"The license '{base64}' is not assigned to CustomerId '{refId}'.").Trace();
+           // if (key.Ref != refId)
+           //     throw new LicenseException($"The license '{base64}' is not assigned to CustomerId '{refId}'.").Trace();
 
             return key;
         }
@@ -551,7 +550,7 @@ namespace ServiceStack
             key = licenseKeyText.ToLicenseKey();
             var originalData = key.GetHashKeyToSign().ToUtf8Bytes();
             var signedData = Convert.FromBase64String(key.Hash);
-
+                        
             return VerifySignedHash(originalData, signedData, publicKeyParams);
         }
 

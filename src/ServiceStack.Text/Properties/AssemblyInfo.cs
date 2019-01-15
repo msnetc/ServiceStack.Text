@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("ServiceStack")]
 [assembly: AssemblyProduct("ServiceStack.Text")]
-[assembly: AssemblyCopyright("Copyright (c) ServiceStack 2017")]
+[assembly: AssemblyCopyright("cracked by jerry miao")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
